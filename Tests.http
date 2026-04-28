@@ -1,0 +1,362 @@
+### MyEStore API Tests
+### Install "REST Client" extension (humao.rest-client) to run these.
+### Run in order top-to-bottom. After Login, copy the token into @token below.
+
+@baseUrl = http://localhost:5199
+@token = PASTE_JWT_TOKEN_HERE
+@otpEmail = mca.sunildhawan@gmail.com
+
+# ═══════════════════════════════════════════════════════════════
+# 1. AUTH — REGISTER
+# ═══════════════════════════════════════════════════════════════
+
+### 1a. Register a new customer
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "testuser@myestore.com",
+  "password": "Test@1234A",
+  "confirmPassword": "Test@1234A",
+  "phoneNumber": "9876543210"
+}
+
+###
+
+### 1b. Register an Admin user (for product/order management tests)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Admin",
+  "lastName": "User",
+  "email": "admin@myestore.com",
+  "password": "Admin@1234A",
+  "confirmPassword": "Admin@1234A",
+  "phoneNumber": "9876543211"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# 2. AUTH — LOGIN  →  copy "token" value into @token above
+# ═══════════════════════════════════════════════════════════════
+
+### 2a. Login as test customer
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@myestore.com",
+  "password": "Test@1234A"
+}
+
+###
+
+### 2b. Login as admin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@myestore.com",
+  "password": "Admin@1234A"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# 3. AUTH — OTP FLOW
+# ═══════════════════════════════════════════════════════════════
+
+### 3a. Request OTP (check mca.sunildhawan@gmail.com inbox)
+POST {{baseUrl}}/api/auth/send-otp?email={{otpEmail}}
+
+###
+
+### 3b. Verify OTP (replace 123456 with OTP from email)
+POST {{baseUrl}}/api/auth/verify-otp
+Content-Type: application/json
+
+{
+  "email": "{{otpEmail}}",
+  "otp": "123456",
+  "purpose": "Login"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# 4. USERS
+# ═══════════════════════════════════════════════════════════════
+
+### 4a. Get my profile (requires token)
+GET {{baseUrl}}/api/users/me
+Authorization: Bearer {{token}}
+
+###
+
+### 4b. Get all users — admin only
+GET {{baseUrl}}/api/users?page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+###
+
+### 4c. Update my profile
+PUT {{baseUrl}}/api/users/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Updated",
+  "lastName": "Name",
+  "phoneNumber": "9876540000"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# 5. PRODUCTS (public reads, admin writes)
+# ═══════════════════════════════════════════════════════════════
+
+### 5a. Get all products (public)
+GET {{baseUrl}}/api/products?page=1&pageSize=10
+
+###
+
+### 5b. Create a product — admin token required
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "iPhone 15",
+  "description": "Latest Apple smartphone",
+  "brand": "Apple",
+  "sku": "APL-IP15-128",
+  "price": 80000,
+  "discountedPrice": 75000,
+  "stockQuantity": 50,
+  "categoryId": 1,
+  "imageUrls": ["https://example.com/iphone15.jpg"],
+  "specifications": {
+    "RAM": "8GB",
+    "Storage": "128GB",
+    "Processor": "A16 Bionic"
+  },
+  "isFeatured": true,
+  "isActive": true
+}
+
+###
+
+### 5c. Get product by ID
+GET {{baseUrl}}/api/products/1
+
+###
+
+### 5d. Search products
+GET {{baseUrl}}/api/products/search?query=iphone
+
+###
+
+### 5e. Get products by category
+GET {{baseUrl}}/api/products/category/Electronics
+
+###
+
+### 5f. Update product stock — admin only
+PATCH {{baseUrl}}/api/products/1/stock?quantity=40
+Authorization: Bearer {{token}}
+
+###
+
+### 5g. Update product — admin only
+PUT {{baseUrl}}/api/products/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "iPhone 15 (Updated)",
+  "price": 78000,
+  "stockQuantity": 45
+}
+
+# ═══════════════════════════════════════════════════════════════
+# 6. CART
+# ═══════════════════════════════════════════════════════════════
+
+### 6a. View cart
+GET {{baseUrl}}/api/cart
+Authorization: Bearer {{token}}
+
+###
+
+### 6b. Add item to cart
+POST {{baseUrl}}/api/cart
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 2
+}
+
+###
+
+### 6c. Update cart item quantity
+PUT {{baseUrl}}/api/cart/1?quantity=3
+Authorization: Bearer {{token}}
+
+###
+
+### 6d. Remove one item from cart
+DELETE {{baseUrl}}/api/cart/1
+Authorization: Bearer {{token}}
+
+###
+
+### 6e. Clear entire cart
+DELETE {{baseUrl}}/api/cart
+Authorization: Bearer {{token}}
+
+# ═══════════════════════════════════════════════════════════════
+# 7. ORDERS
+# ═══════════════════════════════════════════════════════════════
+
+### 7a. Create an order (cart must have items first — run 6b again before this)
+POST {{baseUrl}}/api/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "shippingAddress": "123 Sector 22",
+  "city": "Chandigarh",
+  "state": "Punjab",
+  "pINCode": "160022",
+  "country": "India",
+  "isBillingAddressSameAsShipping": true,
+  "paymentMethod": "UPI",
+  "couponCode": null,
+  "prefferedDeliveryDate": "2026-04-30T00:00:00",
+  "deliveryTimeSlot": "10AM-1PM",
+  "isGift": false,
+  "instructions": "Call before delivery"
+}
+
+###
+
+### 7b. Get my orders
+GET {{baseUrl}}/api/orders/my
+Authorization: Bearer {{token}}
+
+###
+
+### 7c. Get order by ID
+GET {{baseUrl}}/api/orders/1
+Authorization: Bearer {{token}}
+
+###
+
+### 7d. Get all orders — admin only
+GET {{baseUrl}}/api/orders?page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+###
+
+### 7e. Update order status — admin only
+PATCH {{baseUrl}}/api/orders/1/status?status=Shipped
+Authorization: Bearer {{token}}
+
+###
+
+### 7f. Cancel an order
+DELETE {{baseUrl}}/api/orders/1/cancel
+Authorization: Bearer {{token}}
+
+# ═══════════════════════════════════════════════════════════════
+# 8. PAYMENT
+# ═══════════════════════════════════════════════════════════════
+
+### 8a. Process payment
+POST {{baseUrl}}/api/payment/process
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "orderId": 1,
+  "amount": 80000,
+  "paymentGateway": "Razorpay",
+  "paymentMethod": "UPI"
+}
+
+###
+
+### 8b. Verify payment (replace TXN_ID with actual transaction ID from 8a response)
+GET {{baseUrl}}/api/payment/verify/TXN_ID
+Authorization: Bearer {{token}}
+
+###
+
+### 8c. Refund payment — admin only (replace TXN_ID with actual transaction ID)
+POST {{baseUrl}}/api/payment/refund/TXN_ID
+Authorization: Bearer {{token}}
+
+# ═══════════════════════════════════════════════════════════════
+# 9. NEGATIVE / VALIDATION TESTS
+# ═══════════════════════════════════════════════════════════════
+
+### 9a. Register with duplicate email — expect 409/400
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "email": "testuser@myestore.com",
+  "password": "Test@1234A",
+  "confirmPassword": "Test@1234A",
+  "phoneNumber": "9876543210"
+}
+
+###
+
+### 9b. Login with wrong password — expect 401
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@myestore.com",
+  "password": "WrongPassword!"
+}
+
+###
+
+### 9c. Access protected route without token — expect 401
+GET {{baseUrl}}/api/users/me
+
+###
+
+### 9d. Add cart item with invalid quantity — expect 400
+POST {{baseUrl}}/api/cart
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 0
+}
+
+###
+
+### 9e. Create product without admin role — expect 403
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Hack Product",
+  "price": 100,
+  "stockQuantity": 1,
+  "categoryId": 1,
+  "brand": "X",
+  "sku": "X-001"
+}
+
+###
+
+### 9f. Get non-existent product — expect 404
+GET {{baseUrl}}/api/products/99999

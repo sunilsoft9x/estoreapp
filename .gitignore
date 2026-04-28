@@ -1,0 +1,14 @@
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+bin/
+obj/
+
+# IDE files
+.vs/
+.vscode/
+futureversion.md
+run_tests.sh
