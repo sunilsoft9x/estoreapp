@@ -2,6 +2,13 @@
 A robust Electronics Store backend API developed using .NET and PostgreSQL, implementing JWT authentication with 2FA (OTP), role-based authorization, product catalog management, cart and order processing, and clean service-based architecture with DTO patterns.
 # 🛒 Electronics Store Backend API
 
+![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)
+![2FA](https://img.shields.io/badge/Security-2FA-FF6F00)
+![Swagger](https://img.shields.io/badge/API-Swagger-85EA2D?logo=swagger&logoColor=black)
+![Status](https://img.shields.io/badge/Status-Active-2ECC71)
+![License](https://img.shields.io/badge/License-MIT-F1C40F)
 A scalable and production-ready backend for an **Electronics Store** built using **.NET**, following clean architecture principles. This project implements secure authentication, role-based access control, 2FA via OTP, and full e-commerce workflows including product management, cart handling, and order processing.
 
 ---
