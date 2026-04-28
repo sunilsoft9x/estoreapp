@@ -9,6 +9,7 @@ A robust Electronics Store backend API developed using .NET and PostgreSQL, impl
 ![Swagger](https://img.shields.io/badge/API-Swagger-85EA2D?logo=swagger&logoColor=black)
 ![Status](https://img.shields.io/badge/Status-Active-2ECC71)
 ![License](https://img.shields.io/badge/License-MIT-F1C40F)
+
 A scalable and production-ready backend for an **Electronics Store** built using **.NET**, following clean architecture principles. This project implements secure authentication, role-based access control, 2FA via OTP, and full e-commerce workflows including product management, cart handling, and order processing.
 
 ---
